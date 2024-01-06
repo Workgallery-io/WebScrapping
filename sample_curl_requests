@@ -1,0 +1,5 @@
+curl -X POST -H "Content-Type: application/json" -d '{"profiles": ["sebastiantorralba"]}' http://127.0.0.1:5000/scrape_medium_profiles
+
+curl -X POST -H "Content-Type: application/json" -d '{"profiles": ["snehith57624"]}' http://127.0.0.1:5000/scrape_github_profiles     
+
+curl -X POST -H "Content-Type: application/json" -d '{ "profiles": [ "snehith-bikumandla" ] }' http://127.0.0.1:5000/scrape_linkedin_profiles
