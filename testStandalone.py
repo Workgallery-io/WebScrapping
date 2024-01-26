@@ -2,10 +2,14 @@ import requests
 import base64
 from flask import Flask, jsonify, request
 from linkedin_api import Linkedin
+from huggingface_hub import InferenceClient
 
+client = InferenceClient(
+    "mistralai/Mistral-7B-Instruct-v0.1"
+)
 app = Flask(__name__)
 
-linkedin = Linkedin("snehithb295@gmail.com", "du-F+EY?D9t^c$2")
+linkedin = Linkedin("snehithb295@gmail.com", "Test@476")
 
 
 def scrape_data(profiles_input):
@@ -59,6 +63,38 @@ def get_readme_content(username, repo_name):
             return ""  # Return empty string if README content is not present
     else:
         return ""  # Return empty string if README cannot be fetched
+
+
+def split_paragraph(paragraph, max_length=1000):
+    sentences = paragraph.split('. ')
+    result_paragraphs = []
+
+    current_paragraph = ""
+
+    for sentence in sentences:
+        if len(current_paragraph) + len(sentence) + 2 <= max_length:  # 2 for the space and period
+            current_paragraph += sentence + '. '
+        else:
+            result_paragraphs.append(current_paragraph.strip())
+            current_paragraph = sentence + '. '
+
+    if current_paragraph:
+        result_paragraphs.append(current_paragraph.strip())
+
+    return result_paragraphs
+
+
+@app.route('/summarize_text', methods=['POST'])
+def summarize_text():
+    request_data = request.json
+    input_text = request_data.get('summarize_text', "No input received")
+    paragraphs = split_paragraph(input_text)
+    output = ""
+    for paragraph in paragraphs:
+        prompt = "[INST] summarize the text:" + paragraph + "   [/INST]"
+        res = client.text_generation(prompt, max_new_tokens=95)
+        output = output + res
+    return output
 
 
 @app.route('/scrape_github_profiles', methods=['POST'])
